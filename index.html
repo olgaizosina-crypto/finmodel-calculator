@@ -1,0 +1,295 @@
+<meta charset="utf-8">
+<title>Финмодель отдела продаж</title>
+<style>
+:root{
+  --paper:#F6F5F0; --card:#FFFFFF; --ink:#22302A; --muted:#5C6B62;
+  --line:#E2E0D6; --accent:#2E6B4E; --accent-soft:#EAF2ED; --accent-ink:#1E4A36;
+  --profit:#1E6B45; --tax:#8A6A24; --field:#FBFAF7;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#141A17; --card:#1C2420; --ink:#E8EAE4; --muted:#9AA89F;
+    --line:#2A342E; --accent:#6FBF95; --accent-soft:#22352B; --accent-ink:#A8D9BF;
+    --profit:#7CCB9F; --tax:#D2B36A; --field:#171F1B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141A17; --card:#1C2420; --ink:#E8EAE4; --muted:#9AA89F;
+  --line:#2A342E; --accent:#6FBF95; --accent-soft:#22352B; --accent-ink:#A8D9BF;
+  --profit:#7CCB9F; --tax:#D2B36A; --field:#171F1B;
+}
+:root[data-theme="light"]{
+  --paper:#F6F5F0; --card:#FFFFFF; --ink:#22302A; --muted:#5C6B62;
+  --line:#E2E0D6; --accent:#2E6B4E; --accent-soft:#EAF2ED; --accent-ink:#1E4A36;
+  --profit:#1E6B45; --tax:#8A6A24; --field:#FBFAF7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+header h1{font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+  font-size:clamp(24px,3.2vw,34px);font-weight:600;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:64ch}
+.grid{display:grid;grid-template-columns:minmax(340px,1fr) minmax(320px,420px);gap:24px;margin-top:26px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+form{display:flex;flex-direction:column;gap:18px;margin:0}
+fieldset{border:1px solid var(--line);border-radius:10px;background:var(--card);
+  padding:16px 18px 18px;margin:0;display:flex;flex-direction:column;gap:12px}
+legend{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent-ink);padding:0 8px}
+.row{display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:center}
+.row label{color:var(--ink)}
+.hint{display:block;font-size:12px;color:var(--muted)}
+input[type=number],select{padding:8px 10px;border:1px solid var(--line);border-radius:7px;
+  background:var(--field);color:var(--ink);font-size:15px;
+  font-variant-numeric:tabular-nums}
+input[type=number]{width:100%;text-align:right}
+select{width:100%}
+input[type=number]:focus,select:focus,input[type=checkbox]:focus-visible,input[type=radio]:focus-visible{
+  outline:2px solid var(--accent);outline-offset:1px}
+.team-head,.team-row{display:grid;grid-template-columns:24px 1fr 58px 110px 74px;gap:8px;align-items:center}
+.team-head{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.team-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);margin:0}
+.team-row .off{opacity:.45}
+.radio-line{display:flex;flex-wrap:wrap;gap:14px}
+.radio-line label{display:flex;gap:7px;align-items:center;cursor:pointer}
+input[type=radio]{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.note{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin:2px 0 0}
+aside{position:sticky;top:16px;display:flex;flex-direction:column;gap:16px}
+.results{border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
+.results .top{background:var(--accent-soft);padding:18px 20px 16px}
+.results .top .cap{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-ink)}
+#netProfit{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:34px;font-weight:600;
+  color:var(--profit);font-variant-numeric:tabular-nums;margin-top:2px}
+.results .top .sub{font-size:13px;color:var(--muted);margin-top:2px}
+.rlist{padding:8px 20px 16px}
+.rrow{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid var(--line);
+  font-variant-numeric:tabular-nums}
+.rrow:last-child{border-bottom:none}
+.rrow .k{color:var(--muted)}
+.rrow.strong .k,.rrow.strong .v{color:var(--ink);font-weight:600}
+.rrow .v{white-space:nowrap}
+.rrow.tax .v{color:var(--tax)}
+.rrow.indent{padding-left:16px;font-size:13.5px}
+.warn{display:none;margin:0 20px 14px;padding:8px 12px;border-radius:7px;
+  background:var(--accent-soft);color:var(--tax);font-size:13px}
+.tablecard{margin-top:26px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px 18px}
+.tablecard h2{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:19px;margin:0 0 10px;font-weight:600}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 12px;text-align:right;border-bottom:1px solid var(--line);font-size:13.5px}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:none;font-weight:600}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Финмодель отдела продаж</h1>
+  <p>Задайте параметры продаж, команду, расходы и налоги — горизонт до полной распродажи лотов, доход, расходы и чистая прибыль пересчитываются мгновенно.</p>
+</header>
+
+<div class="grid">
+<form id="calc">
+
+<fieldset>
+  <legend>Продажи</legend>
+  <div class="row"><label for="avgCheck">Средний чек объекта, ₽</label>
+    <input type="number" id="avgCheck" value="10000000" min="0" step="100000"></div>
+  <div class="row"><label for="commissionPct">Комиссия от застройщика, %</label>
+    <input type="number" id="commissionPct" value="10" min="0" max="100" step="0.1"></div>
+  <div class="row"><label for="totalLots">Всего лотов в проекте, шт</label>
+    <input type="number" id="totalLots" value="40" min="1" step="1"></div>
+  <div class="row"><label for="firstMonth">Продаж в 1-й месяц, шт</label>
+    <input type="number" id="firstMonth" value="4" min="0" step="1"></div>
+  <div class="row"><label for="growthPct">Прирост продаж, % в месяц<span class="hint">например 10 или 20</span></label>
+    <input type="number" id="growthPct" value="10" min="0" step="1"></div>
+</fieldset>
+
+<fieldset>
+  <legend>Команда</legend>
+  <div class="team-head"><span></span><span>Роль</span><span>Чел</span><span>Оклад, ₽/мес</span><span>% от комиссии</span></div>
+  <div class="team-row"><input type="checkbox" id="on0"><label for="on0">Руководитель проекта</label><input type="number" id="qty0" value="1" min="0" step="1"><input type="number" id="sal0" value="150000" min="0" step="5000"><input type="number" id="pct0" value="1" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on1" checked><label for="on1">Руководитель отдела продаж (РОП)</label><input type="number" id="qty1" value="1" min="0" step="1"><input type="number" id="sal1" value="120000" min="0" step="5000"><input type="number" id="pct1" value="1" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on2" checked><label for="on2">Менеджер продаж</label><input type="number" id="qty2" value="1" min="0" step="1"><input type="number" id="sal2" value="60000" min="0" step="5000"><input type="number" id="pct2" value="2" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on3"><label for="on3">Амбассадор</label><input type="number" id="qty3" value="1" min="0" step="1"><input type="number" id="sal3" value="50000" min="0" step="5000"><input type="number" id="pct3" value="2" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on4"><label for="on4">Маркетолог</label><input type="number" id="qty4" value="1" min="0" step="1"><input type="number" id="sal4" value="80000" min="0" step="5000"><input type="number" id="pct4" value="0" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on5"><label for="on5">Ассистент</label><input type="number" id="qty5" value="1" min="0" step="1"><input type="number" id="sal5" value="50000" min="0" step="5000"><input type="number" id="pct5" value="0" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on6"><label for="on6">Сопровожденец</label><input type="number" id="qty6" value="1" min="0" step="1"><input type="number" id="sal6" value="60000" min="0" step="5000"><input type="number" id="pct6" value="0.5" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on7"><label for="on7">Юрист</label><input type="number" id="qty7" value="1" min="0" step="1"><input type="number" id="sal7" value="70000" min="0" step="5000"><input type="number" id="pct7" value="0" min="0" step="0.1"></div>
+  <div class="team-row"><input type="checkbox" id="on8"><label for="on8">Бухгалтер</label><input type="number" id="qty8" value="1" min="0" step="1"><input type="number" id="sal8" value="50000" min="0" step="5000"><input type="number" id="pct8" value="0" min="0" step="0.1"></div>
+  <p class="hint" style="margin:0">Оклад и % указываются на одного человека и умножаются на количество.</p>
+  <div class="row"><label for="bonusPct">Общий бонусный фонд команды, % от комиссии<span class="hint">сверх личных процентов ролей</span></label>
+    <input type="number" id="bonusPct" value="8" min="0" step="0.5"></div>
+</fieldset>
+
+<fieldset>
+  <legend>Расходы, ₽/мес</legend>
+  <div class="row"><label for="expOffice">Офис</label><input type="number" id="expOffice" value="60000" min="0" step="5000"></div>
+  <div class="row"><label for="expMkt">Маркетинг и реклама</label><input type="number" id="expMkt" value="150000" min="0" step="5000"></div>
+  <div class="row"><label for="expCrm">CRM и ПО</label><input type="number" id="expCrm" value="20000" min="0" step="1000"></div>
+  <div class="row"><label for="expOther">Прочее</label><input type="number" id="expOther" value="30000" min="0" step="5000"></div>
+</fieldset>
+
+<fieldset>
+  <legend>Налоги (ООО)</legend>
+  <div class="radio-line">
+    <label><input type="radio" name="regime" id="regimeD" value="d" checked>УСН «доходы»</label>
+    <label><input type="radio" name="regime" id="regimeDR" value="dr">УСН «доходы − расходы»</label>
+  </div>
+  <div class="row"><label for="rateD">Ставка УСН «доходы», %</label><input type="number" id="rateD" value="6" min="0" step="0.5"></div>
+  <div class="row"><label for="rateDR">Ставка УСН «доходы − расходы», %</label><input type="number" id="rateDR" value="15" min="0" step="0.5"></div>
+  <div class="row"><label for="vatRate">НДС, %<span class="hint">выделяется из комиссии «в том числе»</span></label>
+    <select id="vatRate">
+      <option value="0" selected>0 — без НДС</option>
+      <option value="5">5</option>
+      <option value="7">7</option>
+      <option value="22">22</option>
+    </select></div>
+  <div class="row"><label for="ndflPct">НДФЛ, %<span class="hint">на оклады и бонусы</span></label><input type="number" id="ndflPct" value="13" min="0" step="0.5"></div>
+  <div class="row"><label for="insPct">Страховые взносы, %<span class="hint">на оклады и бонусы</span></label><input type="number" id="insPct" value="30" min="0" step="0.5"></div>
+  <p class="note">Оклады и бонусы считаются начисленными (gross): НДФЛ удерживается внутри начислений, страховые взносы начисляются сверх. НДС выделяется из дохода «в том числе», без учёта вычетов; УСН считается от дохода без НДС. При УСН «доходы − расходы» действует минимальный налог 1% от дохода. Ставки редактируемые — подставьте действующие для вашего региона и года.</p>
+</fieldset>
+
+</form>
+
+<aside>
+  <div class="results">
+    <div class="top">
+      <div class="cap">Чистая прибыль за проект</div>
+      <div id="netProfit">—</div>
+      <div class="sub" id="horizonLine">—</div>
+    </div>
+    <p class="warn" id="warnBox"></p>
+    <div class="rlist">
+      <div class="rrow strong"><span class="k">Общий доход (комиссия)</span><span class="v" id="rRevenue">—</span></div>
+      <div class="rrow"><span class="k">Продано лотов</span><span class="v" id="rLots">—</span></div>
+      <div class="rrow"><span class="k">Команда, чел</span><span class="v" id="rHeadcount">—</span></div>
+      <div class="rrow strong"><span class="k">Расходы, всего</span><span class="v" id="rCosts">—</span></div>
+      <div class="rrow indent"><span class="k">Оклады (начислено)</span><span class="v" id="rSalaries">—</span></div>
+      <div class="rrow indent"><span class="k">Бонусы и % команде (начислено)</span><span class="v" id="rBonuses">—</span></div>
+      <div class="rrow indent"><span class="k">Страховые взносы</span><span class="v" id="rIns">—</span></div>
+      <div class="rrow indent"><span class="k">Операционные расходы</span><span class="v" id="rOpex">—</span></div>
+      <div class="rrow tax"><span class="k" id="vatLabel">НДС</span><span class="v" id="rVat">—</span></div>
+      <div class="rrow tax"><span class="k" id="taxLabel">Налог УСН</span><span class="v" id="rTax">—</span></div>
+      <div class="rrow indent"><span class="k">в т.ч. НДФЛ внутри начислений (справочно)</span><span class="v" id="rNdfl">—</span></div>
+      <div class="rrow"><span class="k">Рентабельность (от дохода)</span><span class="v" id="rMargin">—</span></div>
+      <div class="rrow"><span class="k">Средняя чистая прибыль в месяц</span><span class="v" id="rAvg">—</span></div>
+    </div>
+  </div>
+</aside>
+</div>
+
+<div class="tablecard">
+  <h2>Помесячный план продаж</h2>
+  <div class="scroll"><table id="monthTable">
+    <thead><tr><th>Месяц</th><th>Продажи, шт</th><th>Продано накопленно</th><th>Доход, ₽</th><th>Доход накопленно, ₽</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+</div>
+</div>
+
+<script>
+function num(id){var v=parseFloat(document.getElementById(id).value);return isFinite(v)?v:0;}
+function fmt(x){return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.floor(x+0.5))+' ₽';}
+var MAX_MONTHS=600, ROLES=9;
+
+function schedule(first,growth,total){
+  var months=[],cum=0,m=1;
+  while(cum<total&&m<=MAX_MONTHS){
+    var plan=Math.floor(first*Math.pow(1+growth,m-1)+0.5);
+    var sold=Math.min(plan,total-cum);
+    months.push(sold);cum+=sold;
+    if(plan<=0)break;
+    m++;
+  }
+  return {months:months,sold:cum};
+}
+
+function recalc(){
+  var avgCheck=num('avgCheck'),commission=num('commissionPct')/100,totalLots=num('totalLots');
+  var first=num('firstMonth'),growth=num('growthPct')/100;
+  var bonusPct=num('bonusPct')/100,ndfl=num('ndflPct')/100,ins=num('insPct')/100;
+  var vatR=parseFloat(document.getElementById('vatRate').value)/100;
+  var opexMonth=num('expOffice')+num('expMkt')+num('expCrm')+num('expOther');
+
+  var salariesMonth=0,personalPct=0,headcount=0;
+  for(var i=0;i<ROLES;i++){
+    var on=document.getElementById('on'+i).checked;
+    ['qty','sal','pct'].forEach(function(p){document.getElementById(p+i).classList.toggle('off',!on);});
+    if(on){
+      var q=num('qty'+i);
+      headcount+=q;
+      salariesMonth+=q*num('sal'+i);
+      personalPct+=q*num('pct'+i)/100;
+    }
+  }
+
+  var s=schedule(first,growth,totalLots);
+  var horizon=s.months.length;
+  var warn=document.getElementById('warnBox');
+  if(s.sold<totalLots){
+    warn.style.display='block';
+    warn.textContent='При таких темпах все лоты не распродаются: продано '+s.sold+' из '+totalLots+' за '+horizon+' мес. Увеличьте продажи в 1-й месяц или прирост.';
+  }else{warn.style.display='none';warn.textContent='';}
+
+  var perLot=avgCheck*commission;
+  var revenue=s.sold*perLot;
+  var vat=revenue*vatR/(1+vatR);
+  var revenueNet=revenue-vat;
+  var salaries=salariesMonth*horizon;
+  var bonuses=revenue*(bonusPct+personalPct);
+  var grossPayroll=salaries+bonuses;
+  var insurance=grossPayroll*ins;
+  var ndflAmt=grossPayroll*ndfl;
+  var opex=opexMonth*horizon;
+  var costsBeforeTax=grossPayroll+insurance+opex;
+
+  var isD=document.getElementById('regimeD').checked;
+  var tax,taxLabel;
+  if(isD){
+    tax=revenueNet*num('rateD')/100;
+    taxLabel='Налог УСН «доходы», '+num('rateD')+'%';
+  }else{
+    var base=revenueNet-costsBeforeTax;
+    var minTax=revenueNet*0.01;
+    tax=Math.max(base>0?base*num('rateDR')/100:0,revenueNet>0?minTax:0);
+    taxLabel='Налог УСН «доходы − расходы», '+num('rateDR')+'%';
+  }
+  var net=revenue-costsBeforeTax-vat-tax;
+
+  document.getElementById('netProfit').textContent=fmt(net);
+  document.getElementById('horizonLine').textContent='Горизонт: '+horizon+' мес. до полной распродажи';
+  document.getElementById('rRevenue').textContent=fmt(revenue);
+  document.getElementById('rLots').textContent=s.sold+' шт';
+  document.getElementById('rHeadcount').textContent=headcount+' чел';
+  document.getElementById('rCosts').textContent=fmt(costsBeforeTax+vat+tax);
+  document.getElementById('rSalaries').textContent=fmt(salaries);
+  document.getElementById('rBonuses').textContent=fmt(bonuses);
+  document.getElementById('rIns').textContent=fmt(insurance);
+  document.getElementById('rOpex').textContent=fmt(opex);
+  document.getElementById('vatLabel').textContent='НДС '+(vatR*100)+'% (в т.ч. из дохода)';
+  document.getElementById('rVat').textContent=fmt(vat);
+  document.getElementById('taxLabel').textContent=taxLabel;
+  document.getElementById('rTax').textContent=fmt(tax);
+  document.getElementById('rNdfl').textContent=fmt(ndflAmt);
+  document.getElementById('rMargin').textContent=revenue>0?(net/revenue*100).toFixed(1).replace('.',',')+' %':'—';
+  document.getElementById('rAvg').textContent=horizon>0?fmt(net/horizon):'—';
+
+  var tb=document.querySelector('#monthTable tbody');tb.innerHTML='';
+  var cum=0,cumRev=0;
+  for(var j=0;j<s.months.length;j++){
+    cum+=s.months[j];cumRev+=s.months[j]*perLot;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>Месяц '+(j+1)+'</td><td>'+s.months[j]+'</td><td>'+cum+'</td><td>'+fmt(s.months[j]*perLot)+'</td><td>'+fmt(cumRev)+'</td>';
+    tb.appendChild(tr);
+  }
+  var trTot=document.createElement('tr');
+  trTot.innerHTML='<td>Итого</td><td>'+cum+'</td><td>'+cum+'</td><td>'+fmt(cumRev)+'</td><td>'+fmt(cumRev)+'</td>';
+  tb.appendChild(trTot);
+}
+
+document.getElementById('calc').addEventListener('input',recalc);
+document.getElementById('calc').addEventListener('change',recalc);
+recalc();
+</script>
